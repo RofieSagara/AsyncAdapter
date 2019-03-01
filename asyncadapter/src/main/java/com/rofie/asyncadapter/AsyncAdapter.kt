@@ -31,7 +31,7 @@ import kotlin.coroutines.suspendCoroutine
 // Copyright (c) 2018 Tamvan Developer. All rights reserved.
 //
 
-abstract class BasicRecycleViewAdapter<T: BaseModel<T>, Y: RecyclerView.ViewHolder>: RecyclerView.Adapter<Y>() {
+abstract class AsyncAdapter<T: BaseModel<T>, Y: RecyclerView.ViewHolder>: RecyclerView.Adapter<Y>() {
   private val mListUpdateCallback = object: ListUpdateCallback{
     override fun onChanged(position: Int, count: Int, payload: Any?) {
       notifyItemRangeChanged(position, count, payload)
@@ -52,11 +52,11 @@ abstract class BasicRecycleViewAdapter<T: BaseModel<T>, Y: RecyclerView.ViewHold
 
   private val mData = AsyncListDiffer<T>(mListUpdateCallback, AsyncDifferConfig.Builder<T>(object : DiffUtil.ItemCallback<T>(){
     override fun areContentsTheSame(oldItem: T, newItem: T): Boolean {
-      return this@BasicRecycleViewAdapter.areContentsTheSame(oldItem, newItem)
+      return this@AsyncAdapter.areContentsTheSame(oldItem, newItem)
     }
 
     override fun areItemsTheSame(oldItem: T, newItem: T): Boolean {
-      return this@BasicRecycleViewAdapter.areItemsTheSame(oldItem, newItem)
+      return this@AsyncAdapter.areItemsTheSame(oldItem, newItem)
     }
   }).build())
 
