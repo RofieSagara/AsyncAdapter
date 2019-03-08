@@ -88,8 +88,9 @@ abstract class AsyncAdapter<T: BaseModel<T>, Y: RecyclerView.ViewHolder>: Recycl
         Log.d("AsyncAdapter","Comparator found, Start Sort with Comparator")
         cList.sortWith(it)
       }
+      val finalList = onInit(cList)
       withContext(Dispatchers.Main){
-        submitListSync(cList)
+        submitListSync(finalList)
       }
     }
 
@@ -133,12 +134,65 @@ abstract class AsyncAdapter<T: BaseModel<T>, Y: RecyclerView.ViewHolder>: Recycl
   }
 
   /**
+   * Override this suspend function to make init to all List.
+   * This function run on Async so don't worry to make heavy logic
+   * items in this params already clean and sort
+   *
+   * Tips: You can do init model, For example if you have model to show in RecycleView and in that
+   * model have property String of DateTime and you need to convert to other type like "just now",
+   * 5 minutes later or you change with other for of DateTime you can map list in here.
+   * so you can make your onBindViewHolder only put string to view without logic to make onBindViewHolder more fast.
+   *
+   * @return Return of list of T, the list will put in RecycleView make sure not mess with clean or Sort
+   */
+  protected open suspend fun onInit(items: List<T>): List<T>{
+    return items
+  }
+
+  /**
    * Get current list read Only List
    */
-  protected val items: List<T> get() = mData.currentList
+  public val items: List<T> get() = mData.currentList
 
+  /**
+   * Called to check whether two items have the same data.
+   * <p>
+   * This information is used to detect if the contents of an item have changed.
+   * <p>
+   * This method to check equality instead of {@link Object#equals(Object)} so that you can
+   * change its behavior depending on your UI.
+   * <p>
+   * For example, if you are using DiffUtil with a
+   * {@link RecyclerView.Adapter RecyclerView.Adapter}, you should
+   * return whether the items' visual representations are the same.
+   * <p>
+   * This method is called only if {@link #areItemsTheSame(T, T)} returns {@code true} for
+   * these items.
+   * <p>
+   * Note: Two {@code null} items are assumed to represent the same contents. This callback
+   * will not be invoked for this case.
+   *
+   * @param oldItem The item in the old list.
+   * @param newItem The item in the new list.
+   * @return True if the contents of the items are the same or false if they are different.
+   *
+   */
   protected abstract fun areContentsTheSame(oldItem: T, newItem: T): Boolean
 
+  /**
+   * Called to check whether two objects represent the same item.
+   * <p>
+   * For example, if your items have unique ids, this method should check their id equality.
+   * <p>
+   * Note: {@code null} items in the list are assumed to be the same as another {@code null}
+   * item and are assumed to not be the same as a non-{@code null} item. This callback will
+   * not be invoked for either of those cases.
+   *
+   * @param oldItem The item in the old list.
+   * @param newItem The item in the new list.
+   * @return True if the two items represent the same object or false if they are different.
+   *
+   */
   protected abstract fun areItemsTheSame(oldItem: T, newItem: T): Boolean
 
   private suspend fun submitListSync(items: List<T>): Boolean = suspendCoroutine {
