@@ -61,6 +61,7 @@ abstract class AsyncAdapter<T: BaseModel<T>, Y: RecyclerView.ViewHolder>: Recycl
   }).build())
 
   private val mWorm = object : WormAsync<T>(){
+
     override suspend fun onInsert(items: List<T>) {
       val cList = mData.currentList.toMutableList()
       val leftList: MutableList<T?> = items.toMutableList()
@@ -130,7 +131,7 @@ abstract class AsyncAdapter<T: BaseModel<T>, Y: RecyclerView.ViewHolder>: Recycl
    * @return Select from 2 of them or u can make specific object from them
    */
   protected open fun onReplace(current: T, other: T): T{
-    return current
+    return other
   }
 
   /**
@@ -152,7 +153,7 @@ abstract class AsyncAdapter<T: BaseModel<T>, Y: RecyclerView.ViewHolder>: Recycl
   /**
    * Get current list read Only List
    */
-  public val items: List<T> get() = mData.currentList
+  val items: List<T> get() = mData.currentList
 
   /**
    * Called to check whether two items have the same data.
@@ -202,16 +203,34 @@ abstract class AsyncAdapter<T: BaseModel<T>, Y: RecyclerView.ViewHolder>: Recycl
     }
   }
 
-  fun add(lData: List<T>){
-    mWorm.wormAdd(lData)
+  /**
+   * Add list of items to adapter this items not replace item. but join then item and replace the same
+   */
+  fun add(items: List<T>){
+    mWorm.wormAdd(items)
   }
 
-  fun remove(data: T){
-    mWorm.wormRemove(data)
+  /**
+   * Remove item from adapter
+   */
+  fun remove(item: T){
+    mWorm.wormRemove(item)
   }
 
+  /**
+   * Clear the Adapter
+   */
   fun clear(){
     mWorm.wormClear()
+  }
+
+  /**
+   * Because this run Async so you don't know when the progress done. you can use run this function to run specific block
+   * Example: you call add(items: List) and after that you call this function
+   * it's mean this function will call after add function done!
+   */
+  fun run(block: suspend ()-> Unit){
+    mWorm.wormRun(block)
   }
 
   override fun getItemId(position: Int): Long {

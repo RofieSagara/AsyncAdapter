@@ -47,7 +47,17 @@ abstract class WormAsync<T> {
       CLEAR -> {
         onClear()
       }
+      RUN -> {
+        onRun(food.block)
+      }
     }
+  }
+
+  fun wormRun(block: suspend () -> Unit){
+    stockOrganic.add(
+      Organic(RUN, block = block)
+    )
+    wormMe()
   }
 
   fun wormAdd(data: List<T>){
@@ -72,10 +82,7 @@ abstract class WormAsync<T> {
 
   fun wormClear(){
     stockOrganic.add(
-      Organic(
-        CLEAR,
-        null
-      )
+      Organic(CLEAR)
     )
     wormMe()
   }
@@ -98,11 +105,16 @@ abstract class WormAsync<T> {
 
   protected abstract suspend fun onClear()
 
-  internal class Organic<T>(val code: Int, val items: List<T>? = null)
+  private suspend fun onRun(block: suspend ()-> Unit){
+    block()
+  }
+
+  internal class Organic<T>(val code: Int, val items: List<T>? = null, var block: suspend () -> Unit = {})
 
   companion object {
     private const val INSERT = 1
     private const val REMOVE = 2
     private const val CLEAR = 3
+    private const val RUN = 4
   }
 }
