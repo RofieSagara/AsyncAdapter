@@ -224,6 +224,10 @@ abstract class AsyncAdapter<T: BaseModel<T>, Y: RecyclerView.ViewHolder>: Recycl
     mWorm.wormClear()
   }
 
+  fun kill(){
+    mWorm.wormKill()
+  }
+
   /**
    * Because this run Async so you don't know when the progress done. you can use run this function to run specific block
    * Example: you call add(items: List) and after that you call this function

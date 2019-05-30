@@ -32,7 +32,9 @@ abstract class WormAsync<T> {
     while (stockOrganic.size > 0) {
       val food = stockOrganic[0]
       eat(food)
-      stockOrganic.removeAt(0)
+      if(stockOrganic.size > 0){
+        stockOrganic.removeAt(0)
+      }
     }
   }
 
@@ -87,13 +89,19 @@ abstract class WormAsync<T> {
     wormMe()
   }
 
+  fun wormKill(){
+    mInsect.cancel()
+  }
+
   private fun wormMe() {
     if (mInsect.isCompleted) {
       mInsect = GlobalScope.launch {
         while (stockOrganic.size > 0) {
           val food = stockOrganic[0]
           eat(food)
-          stockOrganic.removeAt(0)
+          if(stockOrganic.size > 0){
+            stockOrganic.removeAt(0)
+          }
         }
       }
     }
